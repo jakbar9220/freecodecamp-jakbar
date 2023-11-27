@@ -1,0 +1,15 @@
+function rot13(str) {
+  let resultStr = ''
+  for (let char of str) {
+    if (/[a-zA-Z]/.test(char)) {
+      //console.log(char.charCodeAt(0))
+      let charShift = (char.charCodeAt(0) - 'A'.charCodeAt(0) + 13) % 26 + 'A'.charCodeAt(0)
+      char = String.fromCharCode(charShift)
+    }
+    resultStr+=char
+  }
+  console.log(resultStr)
+  return resultStr;
+}
+
+rot13("SERR PBQR PNZC");
