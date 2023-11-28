@@ -68,16 +68,31 @@ function checkCashRegister(price, cash, cid) {
 
   for(let i=0;i<currencyUnit.length;i++) {
     let value = currencyUnit[i].value
+    console.log('iteration',i)
+    let j=0
     while (change>=value) {
+      console.log('while iteration', j)
+      console.log(change)
       const index = changeArray.findIndex(obj => obj.unit === currencyUnit[i].unit);
-      if(index!==-1) {
-        changeArray[index].value += value;
+      let cidUnitIndex = cid.findIndex(subArray => subArray.includes(currencyUnit[i].unit))
+      console.log(cid[cidUnitIndex])
+      console.log(currencyUnit[i])
+      if(cid[cidUnitIndex][1]>=value) {
+        console.log(cid[cidUnitIndex])
+        cid[cidUnitIndex][1] = cid[cidUnitIndex][1] - currencyUnit[i].value;
+        if(index!==-1) {
+          changeArray[index].value += value;
+        }
+        else {
+          changeArray.push(currencyUnit[i])
+        }
       }
       else {
-        changeArray.push(currencyUnit[i])
+        break;
       }
       change-=value
-      console.log(change)
+      //console.log(change)
+      j++;
     }
   }
    
