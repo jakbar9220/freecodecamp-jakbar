@@ -50,58 +50,69 @@ function checkCashRegister(price, cash, cid) {
      {unit:"NICKEL", value:0.05},
      {unit:"PENNY", value:0.01}
   ];
-  //  const currencyUnit = [
-  //    ["ONE HUNDRED", 100],
-  //    ["TWENTY", 20],
-  //    ["TEN", 10],
-  //    ["FIVE", 5],
-  //    ["ONE", 1],
-  //    ["QUARTER", 0.25],
-  //    ["DIME", 0.1],
-  //    ["NICKEL", 0.05],
-  //    ["PENNY", 0.01]
-  // ];
 
-  let change = cash- price;
+  let origChange = cash- price;
+  let change = origChange;
   let returnObj = {change:[], status:''}
   let changeArray = []
 
+  const cidTotal = cid.reduce((sum, [_, value]) => sum + value, 0);
+
   for(let i=0;i<currencyUnit.length;i++) {
+    //console.log('itertaion',i)
     let value = currencyUnit[i].value
-    console.log('iteration',i)
     let j=0
     while (change>=value) {
-      console.log('while iteration', j)
-      console.log(change)
+      //console.log('while itertaion',j)
       const index = changeArray.findIndex(obj => obj.unit === currencyUnit[i].unit);
       let cidUnitIndex = cid.findIndex(subArray => subArray.includes(currencyUnit[i].unit))
-      console.log(cid[cidUnitIndex])
-      console.log(currencyUnit[i])
       if(cid[cidUnitIndex][1]>=value) {
-        console.log(cid[cidUnitIndex])
-        cid[cidUnitIndex][1] = cid[cidUnitIndex][1] - currencyUnit[i].value;
+        //console.log(cid[cidUnitIndex])
+        cid[cidUnitIndex][1] = (cid[cidUnitIndex][1] - currencyUnit[i].value).toFixed(2);
         if(index!==-1) {
-          changeArray[index].value += value;
+          changeArray[index].value = parseFloat((
+            parseFloat(changeArray[index].value) + value
+          ).toFixed(2));
         }
         else {
-          changeArray.push(currencyUnit[i])
+          let obj = { ...currencyUnit[i] }; //Create a new object
+          changeArray.push(obj)
         }
       }
       else {
         break;
       }
-      change-=value
-      //console.log(change)
+      change = (change-value).toFixed(2)
       j++;
+    }
+  }
+
+  // Include zero values in cid into changeArray
+  for (let i = 0; i < cid.length; i++) {
+    const unit = cid[i][0];
+    const value = cid[i][1];
+    const index = changeArray.findIndex((obj) => obj.unit === unit);
+    if (parseFloat(value) === 0 && index === -1) {
+      changeArray.push({ unit, value });
     }
   }
    
   for (let i=0;i<changeArray.length;i++) {
     returnObj['change'].push(Object.values(changeArray[i]))
   }
-  
+
+  const changeArrayTotal = changeArray.reduce((sum, { value }) => sum + value, 0);
+
+  if(cidTotal<origChange || changeArrayTotal<change) {
+    returnObj.status = 'INSUFFICIENT_FUNDS'
+    returnObj.change = []
+  } else if(cidTotal == origChange) {
+    returnObj.status = 'CLOSED'
+  } else {
+    returnObj.status = 'OPEN'
+  }
   console.log(returnObj)
   return returnObj;
 }
 
-checkCashRegister(3.26, 100, [["PENNY", 1.01], ["NICKEL", 2.05], ["DIME", 3.1], ["QUARTER", 4.25], ["ONE", 90], ["FIVE", 55], ["TEN", 20], ["TWENTY", 60], ["ONE HUNDRED", 100]]) 
+checkCashRegister(19.5, 20, [["PENNY", 0.5], ["NICKEL", 0], ["DIME", 0], ["QUARTER", 0], ["ONE", 0], ["FIVE", 0], ["TEN", 0], ["TWENTY", 0], ["ONE HUNDRED", 0]])
